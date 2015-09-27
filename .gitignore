@@ -1,0 +1,9 @@
+Ballistics.iml
+Ballistics.ipr
+Ballistics.iws
+eclipse/
+gradle/
+.gradle/
+gradlew
+gradlew.bat
+

@@ -1,15 +1,14 @@
 package com.bau5.ballistics
 
+import com.bau5.lib.RichNBTTagCompound._
 import net.minecraft.block.BlockContainer
 import net.minecraft.block.material.Material
 import net.minecraft.block.state.IBlockState
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.tileentity.TileEntity
-import net.minecraft.util.{EnumFacing, BlockPos}
+import net.minecraft.util.{BlockPos, EnumFacing}
 import net.minecraft.world.World
-
-import com.bau5.lib.RichNBTTagCompound._
 
 /**
  * Created by bau5 on 9/24/15.

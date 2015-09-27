@@ -1,13 +1,12 @@
 package com.bau5.ballistics
 
+import com.bau5.lib.RichNBTTagCompound._
 import net.minecraft.creativetab.CreativeTabs
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.{Item, ItemStack}
 import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.util.{EnumParticleTypes, EnumFacing, BlockPos, ChatComponentText}
+import net.minecraft.util.{BlockPos, ChatComponentText, EnumFacing}
 import net.minecraft.world.World
-
-import com.bau5.lib.RichNBTTagCompound._
 
 /**
  * Created by bau5 on 9/25/15.

@@ -1,6 +1,6 @@
 package com.bau5.ballistics
 
-import net.minecraft.util.{Vec3, BlockPos}
+import net.minecraft.util.{BlockPos, Vec3}
 
 /**
  * Created by bau5 on 9/25/15.

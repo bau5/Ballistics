@@ -1,27 +1,24 @@
 package com.bau5.ballistics
 
 import net.minecraft.util.{BlockPos, Vec3}
+import com.bau5.ballistics.RichVector._
 
 /**
  * Created by bau5 on 9/25/15.
  */
-object Target {
-  def apply(x: Int, y: Int, z: Int): Target = new Target(new BlockPos(x, y, z))
+
+object RichVector {
+  def apply(p: BlockPos) = new Vec3(p.getX, p.getY, p.getZ)
+
+  implicit def toRichVector(v: Vec3) = RichVector(v.xCoord, v.yCoord, v.zCoord)
+  implicit def toRichVector(p: BlockPos) = RichVector(p.getX, p.getY, p.getZ)
 }
 
-case class Target(pos: BlockPos) {
-
-  def distanceToTarget(p: BlockPos): Double = distanceToTarget(p.getX, p.getY, p.getZ)
-  def distanceToTarget(xi: Double, yi: Double, zi: Double): Double = {
-    Math.sqrt(Math.pow(pos.getX - xi, 2) + Math.pow(pos.getY - yi, 2) + Math.pow(pos.getZ - zi, 2))
-  }
-
+case class RichVector(x: Double, y: Double, z: Double) extends Vec3(x, y, z) {
   def xzDistanceToTarget(p: BlockPos): Double = xzDistanceToTarget(p.getX, p.getZ)
   def xzDistanceToTarget(xi: Double, zi: Double): Double = {
-    Math.sqrt(Math.pow(pos.getX - xi, 2) + Math.pow(pos.getZ - zi, 2))
+    Math.sqrt(Math.pow(x - xi, 2) + Math.pow(z - zi, 2))
   }
-
-  def centeredTarget: (Double, Double, Double) = (pos.getX + 0.5, pos.getY + 0.5, pos.getZ + 0.5)
 }
 
 object Path {
@@ -36,8 +33,7 @@ object Path {
     val dY = Math.abs(target.getY - climbTo.getY)
     // x,z should be certain percentage of the total xz dist to travel
     // y should be a percentage of only the y dist to travel
-    val dist = new Target(target).distanceToTarget(climbTo)
-
+    val dist = RichVector(target).distanceTo(climbTo)
 
     println(
       s"""
@@ -45,25 +41,25 @@ object Path {
          |Climb to     $climbTo
          |Descend at   ----
          |Target       $target
-         |Distance XZ  ${Target(target).xzDistanceToTarget(initial)}
-          |Distance Y   $dY
-          |Distance     $dist
+         |Distance XZ  ${target.xzDistanceToTarget(initial)}
+         |Distance Y   $dY
+         |Distance     $dist
        """.stripMargin
     )
 
-    new Path(initial, climbTo, new BlockPos(0, 0, 0), target)
+    new Path(RichVector(initial), RichVector(climbTo), RichVector(new BlockPos(0, 0, 0)), RichVector(target))
   }
 }
 
-case class Path(initial: BlockPos, climbTo: BlockPos, descendAt: BlockPos, target: BlockPos) {
-  val diffVector = target.subtract(climbTo)
-  val totalDistance = new Target(target).distanceToTarget(climbTo)
+case class Path(initial: Vec3, climbTo: Vec3, descendAt: Vec3, target: Vec3) {
+  val velocityVector = target.subtract(climbTo)
+  val totalDistance = target.distanceTo(climbTo)
 
   def pointAtT(t: Double): Vec3 = {
     new Vec3(
-      climbTo.getX + (t * diffVector.getX),
-      climbTo.getY + (t * diffVector.getY),
-      climbTo.getZ + (t * diffVector.getZ)
+      climbTo.xCoord + (t * velocityVector.xCoord),
+      climbTo.yCoord + (t * velocityVector.yCoord),
+      climbTo.zCoord + (t * velocityVector.zCoord)
     )
   }
 

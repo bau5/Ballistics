@@ -18,7 +18,12 @@ class ItemPainter extends Item {
     if (!worldIn.isRemote) {
       Option(itemStackIn.getTagCompound) match {
         case Some(tag) if tag.hasKey("launcher") =>
-          playerIn.addChatComponentMessage(new ChatComponentText("Launcher coords: " + tag.readBlockPos("launcher")))
+          Option(worldIn.getTileEntity(tag.readBlockPos("launcher").get)) match {
+            case Some(launcher) if launcher.isInstanceOf[TileEntityLauncher] =>
+            case _ =>
+              println("Not linked to a valid launcher.")
+              tag.removeTag("launcher")
+          }
         case _ =>
           playerIn.addChatComponentMessage(new ChatComponentText("Not linked to a launcher."))
           if (!itemStackIn.hasTagCompound) {
@@ -35,29 +40,26 @@ class ItemPainter extends Item {
       stack.setTagCompound(new NBTTagCompound)
     }
 
-    val launcher = stack.getTagCompound.readBlockPos("launcher") match {
-      case Some(tagPos) =>
-        val te = worldIn.getTileEntity(tagPos)
-        if (te != null && te.isInstanceOf[TileEntityLauncher]) {
-          playerIn.getHeldItem.getTagCompound.writeBlockPos("launcher", te.getPos)
-          playerIn.addChatComponentMessage(new ChatComponentText("Bound to launcher at " + te.getPos))
-          Option(te.asInstanceOf[TileEntityLauncher])
-        } else {
-          None
+    worldIn.getBlockState(pos).getBlock match {
+      case l if l.isInstanceOf[BlockLauncher] =>
+        val tile = worldIn.getTileEntity(pos)
+        if (tile != null) {
+          stack.getTagCompound.writeBlockPos("launcher", tile.getPos)
+          playerIn.addChatComponentMessage(new ChatComponentText("Linked to launcher at " + pos))
         }
       case _ =>
-        None
+        if (stack.getTagCompound.hasKey("launcher")) {
+          val launcherPos = stack.getTagCompound.readBlockPos("launcher").get
+          val tile = worldIn.getTileEntity(launcherPos)
+          if (tile != null && tile.isInstanceOf[TileEntityLauncher]) {
+            val launcher = tile.asInstanceOf[TileEntityLauncher]
+            launcher.currentTarget_(pos)
+            launcher.path_(Path(launcherPos, pos))
+            playerIn.addChatComponentMessage(new ChatComponentText(s"Set target & path ${launcher.currentTarget.get}, ${launcher.path.get}"))
+          }
+        }
     }
 
-    launcher.exists{ case tile =>
-      tile.currentTarget_(Target(pos))
-      tile.path_(Path(tile.getPos, pos))
-      val path = tile.path.get
-      for (i <- 0 until path.totalDistance.toInt) {
-        val vec = path.pointAtT(i / path.totalDistance)
-        println(vec)
-      }
-      true
-    }
+    true
   }
 }
